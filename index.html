@@ -6,27 +6,32 @@
     <title>Metabolic Rate Calculator</title>
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body { 
+        body {
             background-color: #f4f4f9;
             color: #333;
+            padding-top: 20px;
             display: flex;
             justify-content: center;
             align-items: flex-start;
             padding-top: 20px;
             height: 100vh;
             margin: 0;
+            flex-wrap: wrap; /* Allow the containers to wrap */
         }
         .form-container, .results-container {
             background: white;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 0 15px rgba(0,0,0,0.1);
-            width: 48%;
-            margin: 1%;
+            width: 100%; /* Make full width on small screens */
+            max-width: 700px; /* Limit max width */
+            margin: 10px;
             text-align: center;
         }
-        .results-container {
-            background-color: #e9ecef;
+        @media (min-width: 768px) { /* Adjustments for tablets and desktops */
+            .form-container, .results-container {
+                width: 48%; /* Set side by side on larger screens */
+            }
         }
         .card {
             background-color: #ffffff;
@@ -42,7 +47,7 @@
             text-align: center;
         }
         .data {
-            font-size: 18px;
+            font-size: 18px; /* Smaller text on smaller screens */
             margin-top: 10px;
         }
         .label {
@@ -65,72 +70,71 @@
 </head>
 <body>
     <div class="form-container">
-        <img src="https://file.albamon.com/Albamon/Recruit/Photo/C-Photo-View?FN=2022\3\23\JK_CO_BwkeCyl22032322033589.jpg" alt="HumanBalance Logo" style="width: 270px; height: auto; margin: 0 auto 20px;">
+        <img src="https://file.albamon.com/Albamon/Recruit/Photo/C-Photo-View?FN=2022\3\23\JK_CO_BwkeCyl22032322033589.jpg" alt="HumanBalance Logo" style="width: 270px; height: auto; margin-bottom: 20px;">
         <h1>Metabolic Rate Calculator</h1>
-        <form id="calcForm">
-            <div class="form-group row">
-                <label for="height" class="col-sm-4 col-form-label">Height (cm):</label>
-                <div class="col-sm-8">
-                    <input type="number" class="form-control" id="height" required>
-                </div>
-            </div>
-            <div class="form-group row">
-                <label for="weight" class="col-sm-4 col-form-label">Weight (kg):</label>
-                <div class="col-sm-8">
-                    <input type="number" class="form-control" id="weight" required>
-                </div>
-            </div>
-            <div class="form-group row">
-                <label for="age" class="col-sm-4 col-form-label">Age:</label>
-                <div class="col-sm-8">
-                    <input type="number" class="form-control" id="age" required>
-                </div>
-            </div>
-            <div class="form-group row">
-                <label class="col-sm-4 col-form-label">Gender:</label>
-                <div class="col-sm-8 gender-toggle">
-                    <div class="custom-control custom-radio custom-control-inline">
-                        <input type="radio" id="male" name="gender" class="custom-control-input" checked>
-                        <label class="custom-control-label" for="male">Male</label>
-                    </div>
-                    <div class="custom-control custom-radio custom-control-inline">
-                        <input type="radio" id="female" name="gender" class="custom-control-input">
-                        <label class="custom-control-label" for="female">Female</label>
-                    </div>
-                </div>
-            </div>
-            <div class="form-group row">
-                <label for="exercise_level" class="col-sm-4 col-form-label">Frequency:</label>
-                <div class="col-sm-8">
-                    <select class="form-control" id="exercise_level">
-                        <option value="1.2">0 (no exercise)</option>
-                        <option value="1.375">1 (light exercise)</option>
-                        <option value="1.55">2 (moderate exercise)</option>
-                        <option value="1.725">3 (heavy exercise)</option>
-                        <option value="1.9">4 (very heavy exercise)</option>
-                        <option value="2.075">5 (hard exercise)</option>
-                    </select>
-                </div>
-            </div>
-            <div class="form-group row">
-                <label for="goal" class="col-sm-4 col-form-label">Goal:</label>
-                <div class="col-sm-8">
-                    <select class="form-control" id="goal">
-                        <option value="diet">Diet</option>
-                        <option value="bulk">Bulk Up</option>
-                        <option value="maintenance">Maintain Weight</option>
-                    </select>
-                </div>
-            </div>
-            <button type="submit" class="btn btn-primary btn-block">Calculate</button>
-        </form>
-    </div>
-    <div class="results-container">
-        <h1 class="text-center">Results</h1>
-        <div id="results"></div>
-    </div>
-
-    <script>
+          <form id="calcForm">
+              <div class="form-group row">
+                  <label for="height" class="col-sm-4 col-form-label">Height (cm):</label>
+                  <div class="col-sm-8">
+                      <input type="number" class="form-control" id="height" required>
+                  </div>
+              </div>
+              <div class="form-group row">
+                  <label for="weight" class="col-sm-4 col-form-label">Weight (kg):</label>
+                  <div class="col-sm-8">
+                      <input type="number" class="form-control" id="weight" required>
+                  </div>
+              </div>
+              <div class="form-group row">
+                  <label for="age" class="col-sm-4 col-form-label">Age:</label>
+                  <div class="col-sm-8">
+                      <input type="number" class="form-control" id="age" required>
+                  </div>
+              </div>
+              <div class="form-group row">
+                  <label class="col-sm-4 col-form-label">Gender:</label>
+                  <div class="col-sm-8 gender-toggle">
+                      <div class="custom-control custom-radio custom-control-inline">
+                          <input type="radio" id="male" name="gender" class="custom-control-input" checked>
+                          <label class="custom-control-label" for="male">Male</label>
+                      </div>
+                      <div class="custom-control custom-radio custom-control-inline">
+                          <input type="radio" id="female" name="gender" class="custom-control-input">
+                          <label class="custom-control-label" for="female">Female</label>
+                      </div>
+                  </div>
+              </div>
+              <div class="form-group row">
+                  <label for="exercise_level" class="col-sm-4 col-form-label">Frequency:</label>
+                  <div class="col-sm-8">
+                      <select class="form-control" id="exercise_level">
+                          <option value="1.2">0 (no exercise)</option>
+                          <option value="1.375">1 (light exercise)</option>
+                          <option value="1.55">2 (moderate exercise)</option>
+                          <option value="1.725">3 (heavy exercise)</option>
+                          <option value="1.9">4 (very heavy exercise)</option>
+                          <option value="2.075">5 (hard exercise)</option>
+                      </select>
+                  </div>
+              </div>
+              <div class="form-group row">
+                  <label for="goal" class="col-sm-4 col-form-label">Goal:</label>
+                  <div class="col-sm-8">
+                      <select class="form-control" id="goal">
+                          <option value="diet">Diet</option>
+                          <option value="bulk">Bulk Up</option>
+                          <option value="maintenance">Maintain Weight</option>
+                      </select>
+                  </div>
+              </div>
+              <button type="submit" class="btn btn-primary btn-block">Calculate</button>
+          </form>
+      </div>
+      <div class="results-container">
+          <h1 class="text-center">Results</h1>
+          <div id="results"></div>
+      </div>
+      <script>
         document.getElementById('calcForm').addEventListener('submit', function(event) {
             event.preventDefault();
             calculateResults();
@@ -214,5 +218,6 @@
     </script>
 </body>
 </html>
+
 
 
