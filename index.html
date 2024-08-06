@@ -119,15 +119,20 @@
                   </div>
               </div>
               <div class="form-group row">
-                  <label for="exercise_level" class="col-sm-4 col-form-label">Frequency:</label>
+                <label for="bmr" class="col-sm-4 col-form-label">Basal Metabolic Rate (BMR):</label>
+                <div class="col-sm-8">
+                    <input type="number" class="form-control" id="bmr" required>
+                </div>
+              </div>
+              <div class="form-group row">
+                  <label for="exercise_level" class="col-sm-4 col-form-label">daily activity level:</label>
                   <div class="col-sm-8">
                       <select class="form-control" id="exercise_level">
-                          <option value="1.2">0 (no exercise)</option>
-                          <option value="1.375">1 (light exercise)</option>
-                          <option value="1.55">2 (moderate exercise)</option>
-                          <option value="1.725">3 (heavy exercise)</option>
-                          <option value="1.9">4 (very heavy exercise)</option>
-                          <option value="2.075">5 (hard exercise)</option>
+                          <option value="1.2">0 (a sedentary life or Not working out)</option>
+                          <option value="1.375">1 (Exercise 1 to 3 times a week)</option>
+                          <option value="1.55">2 (Exercise 3 to 5 times a week)</option>
+                          <option value="1.725">3 (Exercise 6 to 7 times a week)</option>
+                          <option value="1.8">4 (exercise twice a day)</option>
                       </select>
                   </div>
               </div>
@@ -181,75 +186,79 @@
             var gender = document.querySelector('input[name="gender"]:checked').value;
             var exerciseLevel = parseFloat(document.getElementById('exercise_level').value);
             var goal = document.getElementById('goal').value;
-            var mealsPerDay = document.querySelector('input[name="mealsPerDay"]:checked').value; // Get the selected meals per day
+            var mealsPerDay = document.querySelector('input[name="mealsPerDay"]:checked').value;
+            var bmr = parseFloat(document.getElementById('bmr').value);
         
-            var results = calculateAll(height, weight, age, gender, exerciseLevel, goal, mealsPerDay);
+            var results = calculateAll(height, weight, age, gender, exerciseLevel, goal, mealsPerDay, bmr);
             displayResults(results);
         }
 
-        function calculateAll(height, weight, age, gender, exerciseLevel, goal, mealsPerDay) {
-            var bmr = gender === 'male' ?
-                88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age) :
-                447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age);
+        function calculateAll(height, weight, age, gender, exerciseLevel, goal, mealsPerDay, bmr) {
             var tdee = bmr * exerciseLevel;
-            var totalCalories = weight * 30; // Calculate total daily calories based on weight
-        
-            var macros = calculateMacros(tdee, goal);
+            var totalCalories = tdee;
+            switch (goal) {
+                case 'diet':
+                    totalCalories = tdee - 600; 
+                    break;
+                case 'bulk':
+                    totalCalories = tdee + 300; 
+            }
+            var macros = calculateMacros(totalCalories, weight, goal);
             var protein = macros[0];
             var carbs = macros[1];
             var fats = macros[2];
-        
+
             var proteinPerMeal = protein / mealsPerDay;
             var carbsPerMeal = carbs / mealsPerDay;
             var fatsPerMeal = fats / mealsPerDay;
-            var caloriesPerMeal = tdee / mealsPerDay;
+            var caloriesPerMeal = totalCalories  / mealsPerDay;
         
             return { tdee, totalCalories, protein, carbs, fats, proteinPerMeal, carbsPerMeal, fatsPerMeal, caloriesPerMeal };
         }
 
-        function calculateMacros(calories, goal) {
+        function calculateMacros(totalCalories, weight, goal) {
             var protein, carbs, fats;
-            switch(goal) {
-                case 'diet':
-                    protein = (calories - 500) * 0.40 / 4; // 40% calories from protein
-                    carbs = (calories - 500) * 0.40 / 4; // 40% calories from carbs
-                    fats = (calories - 500) * 0.20 / 9; // 20% calories from fats
-                    break;
-                case 'bulk':
-                    protein = (calories + 300) * 0.30 / 4; // 30% calories from protein
-                    carbs = (calories + 300) * 0.50 / 4; // 50% calories from carbs
-                    fats = (calories + 300) * 0.20 / 9; // 20% calories from fats
-                    break;
-                default: // maintenance
-                    protein = calories * 0.30 / 4; // 30% calories from protein
-                    carbs = calories * 0.40 / 4; // 40% calories from carbs
-                    fats = calories * 0.30 / 9; // 30% calories from fats
+            if (goal === 'diet') {
+                protein = weight * 2; 
+                carbs = (totalCalories - (protein * 4) - (weight * 0.9 * 9)) / 4; 
+                fats = weight * 0.9; 
+            } else if (goal === 'bulk') {
+                protein = weight * 2; // 증량 시 총 칼로리의 25%를 단백질로
+                carbs = (totalCalories * 0.5) / 4; // 증량 시 총 칼로리의 50%를 탄수화물로
+                fats = (totalCalories - (protein * 4) - (carbs * 4)) / 9; // 증량 시 총 칼로리의 25%를 지방으로
+            } else { // maintenance
+                protein = weight * 2; // 유지 시 총 칼로리의 30%를 단백질로
+                carbs = (totalCalories * 0.5) / 4; // 유지 시 총 칼로리의 40%를 탄수화물로
+                fats = (totalCalories - (protein * 4) - (carbs * 4)) / 9; // 유지 시 총 칼로리의 30%를 지방으로
             }
             return [protein, carbs, fats];
         }
 
         function displayResults(results) {
             var resultsDiv = document.getElementById('results');
-            var mealsPerDay = parseInt(document.querySelector('input[name="mealsPerDay"]:checked').value); // 정확한 식사 횟수 가져오기
+            var mealsPerDay = parseInt(document.querySelector('input[name="mealsPerDay"]:checked').value); 
             resultsDiv.innerHTML = `
-                <div class="card">
-                    <div class="card-header">Total Daily Energy Expenditure (TDEE)</div>
-                    <div class="data"><span class="label">Calories:</span><span class="value">${results.tdee.toFixed(2)} kcal</span></div>
-                </div>
-                <div class="card">
-                    <div class="card-header">Nutrient Breakdown</div>
-                    <div class="data"><span class="label">Total Daily Calories:</span><span class="value">${results.totalCalories.toFixed(2)} g</span></div>
-                    <div class="data"><span class="label">Protein:</span><span class="value">${results.protein.toFixed(2)} g</span></div>
-                    <div class="data"><span class="label">Carbohydrates:</span><span class="value">${results.carbs.toFixed(2)} g</span></div>
-                    <div class="data"><span class="label">Fats:</span><span class="value">${results.fats.toFixed(2)} g</span></div>
-                </div>
-                <div class="card">
-                    <div class="card-header">Per Meal Breakdown<br><span class="sub-title">(Based on ${mealsPerDay}meals per day)</span></div>
-                    <div class="data"><span class="label">Calories per Meal:</span><span class="value">${results.caloriesPerMeal.toFixed(2)} kcal</span></div>
-                    <div class="data"><span class="label">Protein per Meal:</span><span class="value">${results.proteinPerMeal.toFixed(2)} g</span></div>
-                    <div class="data"><span class="label">Carbohydrates per Meal:</span><span class="value">${results.carbsPerMeal.toFixed(2)} g</span></div>
-                    <div class="data"><span class="label">Fats per Meal:</span><span class="value">${results.fatsPerMeal.toFixed(2)} g</span></div>
-                </div>
+        <div class="card">
+            <div class="card-header">Total Daily Energy Expenditure (TDEE)</div>
+            <div class="data"><span class="label">Calories:</span><span class="value">${results.tdee.toFixed(2)} kcal</span></div>
+        </div>
+        <div class="card">
+            <div class="card-header">Total Daily Calories</div>
+            <div class="data"><span class="label">Calories:</span><span class="value">${results.totalCalories.toFixed(2)} kcal</span></div>
+        </div>
+        <div class="card">
+            <div class="card-header">Nutrient Breakdown</div>
+            <div class="data"><span class="label">Protein:</span><span class="value">${results.protein.toFixed(2)} g</span></div>
+            <div class="data"><span class="label">Carbohydrates:</span><span class="value">${results.carbs.toFixed(2)} g</span></div>
+            <div class="data"><span class="label">Fats:</span><span class="value">${results.fats.toFixed(2)} g</span></div>
+        </div>
+        <div class="card">
+            <div class="card-header">Per Meal Breakdown<br><span class="sub-title">(Based on ${mealsPerDay} meals per day)</span></div>
+            <div class="data"><span class="label">Calories per Meal:</span><span class="value">${results.caloriesPerMeal.toFixed(2)} kcal</span></div>
+            <div class="data"><span class="label">Protein per Meal:</span><span class="value">${results.proteinPerMeal.toFixed(2)} g</span></div>
+            <div class="data"><span class="label">Carbohydrates per Meal:</span><span class="value">${results.carbsPerMeal.toFixed(2)} g</span></div>
+            <div class="data"><span class="label">Fats per Meal:</span><span class="value">${results.fatsPerMeal.toFixed(2)} g</span></div>
+        </div>
             `;
         }
     </script>
