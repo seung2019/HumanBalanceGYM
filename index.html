@@ -198,7 +198,6 @@
             var bmr = parseFloat(document.getElementById('bmr').value);
         
             var results = calculateAll(height, weight, age, gender, exerciseLevel, goal, mealsPerDay, bmr);
-            results.name = name; 
             displayResults(results);
             saveResultsToLocal(results);
         }
@@ -244,87 +243,67 @@
             return [protein, carbs, fats];
         }
 
-        function saveToLocalStorage(results) {
-            localStorage.setItem('results', JSON.stringify(results));
-            alert('Results saved to local storage.');
-        }
+        // function saveAsPDF() {
+        //     var results = JSON.parse(localStorage.getItem('results'));
+        //     const { jsPDF } = window.jspdf;
+        //     const doc = new jsPDF();
 
-        function saveAsPDF() {
-            var results = JSON.parse(localStorage.getItem('results'));
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
+        //     // Set the default font for the document
+        //     doc.setFont('Helvetica');
 
-            // Set the default font for the document
-            doc.setFont('Helvetica');
+        //     // Set a title with a larger font and center alignment
+        //     doc.setFontSize(18);
+        //     doc.setFont(undefined, 'bold');
+        //     doc.text(`Results for ${results.name}`, 105, 20, null, null, 'center');
 
-            // Set a title with a larger font and center alignment
-            doc.setFontSize(18);
-            doc.setFont(undefined, 'bold');
-            doc.text(`Results for ${results.name}`, 105, 20, null, null, 'center');
+        //     // Draw a line under the title for separation
+        //     doc.setDrawColor(0);
+        //     doc.setLineWidth(0.5);
+        //     doc.line(20, 25, 190, 25);
 
-            // Draw a line under the title for separation
-            doc.setDrawColor(0);
-            doc.setLineWidth(0.5);
-            doc.line(20, 25, 190, 25);
+        //     // Section headers with a slightly larger font
+        //     doc.setFontSize(14);
+        //     doc.setFont(undefined, 'bold');
+        //     doc.text('Total Daily Energy Expenditure (TDEE)', 20, 35);
 
-            // Section headers with a slightly larger font
-            doc.setFontSize(14);
-            doc.setFont(undefined, 'bold');
-            doc.text('Total Daily Energy Expenditure (TDEE)', 20, 35);
+        //     doc.setFontSize(12);
+        //     doc.setFont(undefined, 'normal');
+        //     doc.text(`${results.tdee} kcal`, 20, 45);
 
-            doc.setFontSize(12);
-            doc.setFont(undefined, 'normal');
-            doc.text(`${results.tdee} kcal`, 20, 45);
+        //     doc.setFontSize(14);
+        //     doc.setFont(undefined, 'bold');
+        //     doc.text('Total Daily Calories', 20, 55);
+        //     doc.setFontSize(12);
+        //     doc.setFont(undefined, 'normal');
+        //     doc.text(`${results.totalCalories} kcal`, 20, 65);
 
-            doc.setFontSize(14);
-            doc.setFont(undefined, 'bold');
-            doc.text('Total Daily Calories', 20, 55);
-            doc.setFontSize(12);
-            doc.setFont(undefined, 'normal');
-            doc.text(`${results.totalCalories} kcal`, 20, 65);
+        //     doc.setFontSize(14);
+        //     doc.setFont(undefined, 'bold');
+        //     doc.text('Nutrient Breakdown', 20, 75);
+        //     doc.setFontSize(12);
+        //     doc.setFont(undefined, 'normal');
+        //     doc.text(`Protein: ${results.protein} g`, 20, 85);
+        //     doc.text(`Carbohydrates: ${results.carbs} g`, 20, 95);
+        //     doc.text(`Fats: ${results.fats} g`, 20, 105);
 
-            doc.setFontSize(14);
-            doc.setFont(undefined, 'bold');
-            doc.text('Nutrient Breakdown', 20, 75);
-            doc.setFontSize(12);
-            doc.setFont(undefined, 'normal');
-            doc.text(`Protein: ${results.protein} g`, 20, 85);
-            doc.text(`Carbohydrates: ${results.carbs} g`, 20, 95);
-            doc.text(`Fats: ${results.fats} g`, 20, 105);
+        //     doc.setFontSize(14);
+        //     doc.setFont(undefined, 'bold');
+        //     doc.text(`Per Meal Breakdown (Based on ${results.mealsPerDay} meals per day)`, 20, 115);
 
-            doc.setFontSize(14);
-            doc.setFont(undefined, 'bold');
-            doc.text(`Per Meal Breakdown (Based on ${results.mealsPerDay} meals per day)`, 20, 115);
+        //     doc.setFontSize(12);
+        //     doc.setFont(undefined, 'normal');
+        //     doc.text(`Calories per Meal: ${results.caloriesPerMeal.toFixed(2)} kcal`, 20, 125);
+        //     doc.text(`Protein per Meal: ${results.proteinPerMeal.toFixed(2)} g`, 20, 135);
+        //     doc.text(`Carbohydrates per Meal: ${results.carbsPerMeal.toFixed(2)} g`, 20, 145);
+        //     doc.text(`Fats per Meal: ${results.fatsPerMeal.toFixed(2)} g`, 20, 155);
 
-            doc.setFontSize(12);
-            doc.setFont(undefined, 'normal');
-            doc.text(`Calories per Meal: ${results.caloriesPerMeal.toFixed(2)} kcal`, 20, 125);
-            doc.text(`Protein per Meal: ${results.proteinPerMeal.toFixed(2)} g`, 20, 135);
-            doc.text(`Carbohydrates per Meal: ${results.carbsPerMeal.toFixed(2)} g`, 20, 145);
-            doc.text(`Fats per Meal: ${results.fatsPerMeal.toFixed(2)} g`, 20, 155);
+        //     // Optionally, add a footer
+        //     doc.setTextColor(150);
+        //     doc.setFontSize(10);
+        //     doc.text('Generated by HumanBalanceGYM', 105, 285, null, null, 'center');
 
-            // Optionally, add a footer
-            doc.setTextColor(150);
-            doc.setFontSize(10);
-            doc.text('Generated by HumanBalanceGYM', 105, 285, null, null, 'center');
-
-            // Generate PDF blob
-            const pdfBlob = doc.output('blob');
-
-            // Create a Blob URL
-            const url = URL.createObjectURL(pdfBlob);
-
-            // Create a link element, use it to download the file and remove it
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'HB-MRcalculator_results.pdf';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-
-            // Clean up the URL
-            URL.revokeObjectURL(url);
-        }
+        //     doc.save('HB-MRcalculator_results.pdf');
+        // }
 
         function displayResults(results) {
             var resultsDiv = document.getElementById('results');
@@ -351,11 +330,17 @@
             <div class="data"><span class="label">Carbohydrates per Meal:</span><span class="value">${results.carbsPerMeal.toFixed(2)} g</span></div>
             <div class="data"><span class="label">Fats per Meal:</span><span class="value">${results.fatsPerMeal.toFixed(2)} g</span></div>
         </div>
-        <button type="button" onclick="saveAsPDF()" class="btn btn-info">Save Results as PDF</button>
             `;
         }
-        function saveResultsToLocal(results) {
-        localStorage.setItem('calcResults', JSON.stringify(results));
+        function saveToLocalStorage(results) {
+            localStorage.setItem('results', JSON.stringify(results));
+        }
+
+        window.onload = function() {
+            if (localStorage.getItem('results')) {
+                var savedResults = JSON.parse(localStorage.getItem('results'));
+                displayResults(savedResults);
+            }
         }
     </script>
 </body>
