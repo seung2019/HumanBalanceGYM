@@ -87,6 +87,12 @@
         <img src="https://file.albamon.com/Albamon/Recruit/Photo/C-Photo-View?FN=2022\3\23\JK_CO_BwkeCyl22032322033589.jpg" alt="HumanBalance Logo" style="width: 270px; height: auto; margin-bottom: 20px;">
         <h1>Metabolic Rate Calculator</h1>
           <form id="calcForm">
+            <div class="form-group row">
+                <label for="name" class="col-sm-4 col-form-label">Name:</label>
+                <div class="col-sm-8">
+                    <input type="text" class="form-control" id="name" required>
+                </div>
+            </div>            
               <div class="form-group row">
                   <label for="height" class="col-sm-4 col-form-label">Height (cm):</label>
                   <div class="col-sm-8">
@@ -172,7 +178,8 @@
         </a>
         <a href="https://www.instagram.com/humanbalance.indonesia/" class="insta-link" target="_blank">humanbalance.indonesia</a>
         <span> | WHATSAPP: +62) 812-9655-7278</span>
-    </div>          
+    </div>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.3.1/jspdf.umd.min.js"></script>          
       <script>
         document.getElementById('calcForm').addEventListener('submit', function(event) {
             event.preventDefault();
@@ -180,6 +187,7 @@
         });
 
         function calculateResults() {
+            var name = document.getElementById('name').value;
             var height = parseFloat(document.getElementById('height').value);
             var weight = parseFloat(document.getElementById('weight').value);
             var age = parseInt(document.getElementById('age').value);
@@ -190,7 +198,9 @@
             var bmr = parseFloat(document.getElementById('bmr').value);
         
             var results = calculateAll(height, weight, age, gender, exerciseLevel, goal, mealsPerDay, bmr);
+            results.name = name; 
             displayResults(results);
+            saveResultsToLocal(results);
         }
 
         function calculateAll(height, weight, age, gender, exerciseLevel, goal, mealsPerDay, bmr) {
@@ -223,15 +233,82 @@
                 carbs = (totalCalories - (protein * 4) - (weight * 0.9 * 9)) / 4; 
                 fats = weight * 0.9; 
             } else if (goal === 'bulk') {
-                protein = weight * 2; // 증량 시 총 칼로리의 25%를 단백질로
-                carbs = (totalCalories * 0.5) / 4; // 증량 시 총 칼로리의 50%를 탄수화물로
-                fats = (totalCalories - (protein * 4) - (carbs * 4)) / 9; // 증량 시 총 칼로리의 25%를 지방으로
+                protein = weight * 2; 
+                carbs = (totalCalories * 0.5) / 4; 
+                fats = (totalCalories - (protein * 4) - (carbs * 4)) / 9; 
             } else { // maintenance
-                protein = weight * 2; // 유지 시 총 칼로리의 30%를 단백질로
-                carbs = (totalCalories * 0.5) / 4; // 유지 시 총 칼로리의 40%를 탄수화물로
-                fats = (totalCalories - (protein * 4) - (carbs * 4)) / 9; // 유지 시 총 칼로리의 30%를 지방으로
+                protein = weight * 2; 
+                carbs = (totalCalories * 0.5) / 4; 
+                fats = (totalCalories - (protein * 4) - (carbs * 4)) / 9; 
             }
             return [protein, carbs, fats];
+        }
+
+        function saveToLocalStorage(results) {
+            localStorage.setItem('results', JSON.stringify(results));
+            alert('Results saved to local storage.');
+        }
+
+        function saveAsPDF() {
+            var results = JSON.parse(localStorage.getItem('results'));
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            // Set the default font for the document
+            doc.setFont('Helvetica');
+
+            // Set a title with a larger font and center alignment
+            doc.setFontSize(18);
+            doc.setFont(undefined, 'bold');
+            doc.text(`Results for ${results.name}`, 105, 20, null, null, 'center');
+
+            // Draw a line under the title for separation
+            doc.setDrawColor(0);
+            doc.setLineWidth(0.5);
+            doc.line(20, 25, 190, 25);
+
+            // Section headers with a slightly larger font
+            doc.setFontSize(14);
+            doc.setFont(undefined, 'bold');
+            doc.text('Total Daily Energy Expenditure (TDEE)', 20, 35);
+
+            doc.setFontSize(12);
+            doc.setFont(undefined, 'normal');
+            doc.text(`${results.tdee} kcal`, 20, 45);
+
+            doc.setFontSize(14);
+            doc.setFont(undefined, 'bold');
+            doc.text('Total Daily Calories', 20, 55);
+            doc.setFontSize(12);
+            doc.setFont(undefined, 'normal');
+            doc.text(`${results.totalCalories} kcal`, 20, 65);
+
+            doc.setFontSize(14);
+            doc.setFont(undefined, 'bold');
+            doc.text('Nutrient Breakdown', 20, 75);
+            doc.setFontSize(12);
+            doc.setFont(undefined, 'normal');
+            doc.text(`Protein: ${results.protein} g`, 20, 85);
+            doc.text(`Carbohydrates: ${results.carbs} g`, 20, 95);
+            doc.text(`Fats: ${results.fats} g`, 20, 105);
+
+            doc.setFontSize(14);
+            doc.setFont(undefined, 'bold');
+            doc.text(`Per Meal Breakdown (Based on ${results.mealsPerDay} meals per day)`, 20, 115);
+
+            doc.setFontSize(12);
+            doc.setFont(undefined, 'normal');
+            doc.text(`Calories per Meal: ${results.caloriesPerMeal.toFixed(2)} kcal`, 20, 125);
+            doc.text(`Protein per Meal: ${results.proteinPerMeal.toFixed(2)} g`, 20, 135);
+            doc.text(`Carbohydrates per Meal: ${results.carbsPerMeal.toFixed(2)} g`, 20, 145);
+            doc.text(`Fats per Meal: ${results.fatsPerMeal.toFixed(2)} g`, 20, 155);
+
+            // Optionally, add a footer
+            doc.setTextColor(150);
+            doc.setFontSize(10);
+            doc.text('Generated by HumanBalanceGYM', 105, 285, null, null, 'center');
+
+            doc.save('HB-MRcalculator_results.pdf');
         }
 
         function displayResults(results) {
@@ -259,7 +336,11 @@
             <div class="data"><span class="label">Carbohydrates per Meal:</span><span class="value">${results.carbsPerMeal.toFixed(2)} g</span></div>
             <div class="data"><span class="label">Fats per Meal:</span><span class="value">${results.fatsPerMeal.toFixed(2)} g</span></div>
         </div>
+        <button type="button" onclick="saveAsPDF()" class="btn btn-info">Save Results as PDF</button>
             `;
+        }
+        function saveResultsToLocal(results) {
+        localStorage.setItem('calcResults', JSON.stringify(results));
         }
     </script>
 </body>
