@@ -207,10 +207,10 @@
             var totalCalories = tdee;
             switch (goal) {
                 case 'diet':
-                    totalCalories = tdee - 600; 
+                    totalCalories = tdee - 500; 
                     break;
                 case 'bulk':
-                    totalCalories = tdee + 300; 
+                    totalCalories = tdee + 500; 
             }
             var macros = calculateMacros(totalCalories, weight, goal);
             var protein = macros[0];
@@ -226,22 +226,26 @@
         }
 
         function calculateMacros(totalCalories, weight, goal) {
-            var protein, carbs, fats;
-            if (goal === 'diet') {
-                protein = weight * 2; 
-                carbs = (totalCalories - (protein * 4) - (weight * 0.9 * 9)) / 4; 
-                fats = weight * 0.9; 
-            } else if (goal === 'bulk') {
-                protein = weight * 2; 
-                carbs = (totalCalories * 0.5) / 4; 
-                fats = (totalCalories - (protein * 4) - (carbs * 4)) / 9; 
-            } else { // maintenance
-                protein = weight * 2; 
-                carbs = (totalCalories * 0.5) / 4; 
-                fats = (totalCalories - (protein * 4) - (carbs * 4)) / 9; 
-            }
-            return [protein, carbs, fats];
-        }
+          var protein, carbs, fats;
+          if (goal === 'diet') {
+              // 다이어트: 총 칼로리 = TDEE - 500, 탄:단:지 비율 3:5:2
+              protein = totalCalories * 0.5 / 4; // 칼로리의 50%는 단백질
+              carbs = totalCalories * 0.3 / 4;   // 칼로리의 30%는 탄수화물
+              fats = totalCalories * 0.2 / 9;    // 칼로리의 20%는 지방
+          } else if (goal === 'bulk') {
+              // 벌크업: 총 칼로리 = TDEE + 500, 탄:단:지 비율 4:4:2
+              protein = totalCalories * 0.4 / 4; // 칼로리의 40%는 단백질
+              carbs = totalCalories * 0.4 / 4;   // 칼로리의 40%는 탄수화물
+              fats = totalCalories * 0.2 / 9;    // 칼로리의 20%는 지방
+          } else { 
+              // 유지: 벌크업과 동일한 비율 사용 (다른 옵션이 없는 경우)
+              protein = totalCalories * 0.4 / 4;
+              carbs = totalCalories * 0.4 / 4;
+              fats = totalCalories * 0.2 / 9;
+          }
+          return [protein, carbs, fats];
+      }
+      
 
         // function saveAsPDF() {
         //     var results = JSON.parse(localStorage.getItem('results'));
@@ -330,6 +334,13 @@
             <div class="data"><span class="label">Carbohydrates per Meal:</span><span class="value">${results.carbsPerMeal.toFixed(2)} g</span></div>
             <div class="data"><span class="label">Fats per Meal:</span><span class="value">${results.fatsPerMeal.toFixed(2)} g</span></div>
         </div>
+        <!-- Nutrition Chart Image Added Below -->
+        <div class="card">
+            <div class="card-header">Nutrition Chart</div>
+            <div class="data">
+                <img src="food_chart.jpg" alt="Nutrition Chart" style="max-width: 100%; height: auto;">
+            </div>
+        </div>
             `;
         }
         function saveToLocalStorage(results) {
@@ -345,7 +356,6 @@
     </script>
 </body>
 </html>
-
 
 
 
