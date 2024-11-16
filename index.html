@@ -6,6 +6,7 @@
     <title>Metabolic Rate Calculator</title>
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
+        /* 기존 스타일 그대로 사용 */
         body {
             background-color: #f4f4f9;
             color: #333;
@@ -16,21 +17,21 @@
             padding-top: 20px;
             height: 100vh;
             margin: 0;
-            flex-wrap: wrap; /* Allow the containers to wrap */
+            flex-wrap: wrap;
         }
         .form-container, .results-container {
             background: white;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 0 15px rgba(0,0,0,0.1);
-            width: 100%; /* Make full width on small screens */
-            max-width: 700px; /* Limit max width */
+            width: 100%;
+            max-width: 700px;
             margin: 10px;
             text-align: center;
         }
-        @media (min-width: 768px) { /* Adjustments for tablets and desktops */
+        @media (min-width: 768px) {
             .form-container, .results-container {
-                width: 48%; /* Set side by side on larger screens */
+                width: 48%;
             }
         }
         .card {
@@ -48,7 +49,7 @@
             line-height: 1.4;
         }
         .data {
-            font-size: 18px; /* Smaller text on smaller screens */
+            font-size: 18px;
             margin-top: 10px;
         }
         .label {
@@ -68,17 +69,17 @@
             margin-bottom: 20px;
         }
         .sub-title {
-            font-size: 16px; /* Smaller font size for the subtitle */
-            color: #007BFF; /* Optional: different color for the subtitle */
-            font-weight: normal; /* Less emphasis on the subtitle */
+            font-size: 16px;
+            color: #007BFF;
+            font-weight: normal;
         }
         .footer {
-            width: 100%;       /* 전체 너비 설정 */
-            text-align: center; /* 텍스트 중앙 정렬 */
-            padding: 10px 0;   /* 상하 패딩 */
-            background-color: #fff; /* 배경 색상 */
-            border-top: 1px solid #ccc; /* 상단 경계선 */
-            box-shadow: 0 -2px 5px rgba(0,0,0,0.1); /* 하단 그림자 추가 */
+            width: 100%;
+            text-align: center;
+            padding: 10px 0;
+            background-color: #fff;
+            border-top: 1px solid #ccc;
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
         }        
     </style>
 </head>
@@ -115,30 +116,24 @@
                   <label class="col-sm-4 col-form-label">Gender:</label>
                   <div class="col-sm-8 gender-toggle">
                       <div class="custom-control custom-radio custom-control-inline">
-                          <input type="radio" id="male" name="gender" class="custom-control-input" checked>
+                          <input type="radio" id="male" name="gender" class="custom-control-input" value="male" checked>
                           <label class="custom-control-label" for="male">Male</label>
                       </div>
                       <div class="custom-control custom-radio custom-control-inline">
-                          <input type="radio" id="female" name="gender" class="custom-control-input">
+                          <input type="radio" id="female" name="gender" class="custom-control-input" value="female">
                           <label class="custom-control-label" for="female">Female</label>
                       </div>
                   </div>
               </div>
               <div class="form-group row">
-                <label for="bmr" class="col-sm-4 col-form-label">Basal Metabolic Rate (BMR):</label>
-                <div class="col-sm-8">
-                    <input type="number" class="form-control" id="bmr" required>
-                </div>
-              </div>
-              <div class="form-group row">
-                  <label for="exercise_level" class="col-sm-4 col-form-label">daily activity level:</label>
+                  <label for="exercise_level" class="col-sm-4 col-form-label">Daily Activity Level:</label>
                   <div class="col-sm-8">
                       <select class="form-control" id="exercise_level">
-                          <option value="1.2">0 (a sedentary life or Not working out)</option>
+                          <option value="1.2">0 (Sedentary or Not working out)</option>
                           <option value="1.375">1 (Exercise 1 to 3 times a week)</option>
                           <option value="1.55">2 (Exercise 3 to 5 times a week)</option>
                           <option value="1.725">3 (Exercise 6 to 7 times a week)</option>
-                          <option value="1.8">4 (exercise twice a day)</option>
+                          <option value="1.9">4 (Very active, hard exercise)</option>
                       </select>
                   </div>
               </div>
@@ -179,7 +174,6 @@
         <a href="https://www.instagram.com/humanbalance.indonesia/" class="insta-link" target="_blank">humanbalance.indonesia</a>
         <span> | WHATSAPP: +62) 812-9655-7278</span>
     </div>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.3.1/jspdf.umd.min.js"></script>          
       <script>
         document.getElementById('calcForm').addEventListener('submit', function(event) {
             event.preventDefault();
@@ -194,124 +188,71 @@
             var gender = document.querySelector('input[name="gender"]:checked').value;
             var exerciseLevel = parseFloat(document.getElementById('exercise_level').value);
             var goal = document.getElementById('goal').value;
-            var mealsPerDay = document.querySelector('input[name="mealsPerDay"]:checked').value;
-            var bmr = parseFloat(document.getElementById('bmr').value);
-        
-            var results = calculateAll(height, weight, age, gender, exerciseLevel, goal, mealsPerDay, bmr);
+            var mealsPerDay = parseInt(document.querySelector('input[name="mealsPerDay"]:checked').value);
+
+            var results = calculateAll(name, height, weight, age, gender, exerciseLevel, goal, mealsPerDay);
             displayResults(results);
-            saveResultsToLocal(results);
+            saveToLocalStorage(results);
         }
 
-        function calculateAll(height, weight, age, gender, exerciseLevel, goal, mealsPerDay, bmr) {
-            var tdee = bmr * exerciseLevel;
-            var totalCalories = tdee;
-            switch (goal) {
-                case 'diet':
-                    totalCalories = tdee - 500; 
-                    break;
-                case 'bulk':
-                    totalCalories = tdee + 500; 
+        function calculateAll(name, height, weight, age, gender, exerciseLevel, goal, mealsPerDay) {
+            // 1. BMR 계산 (Mifflin-St Jeor 공식)
+            var bmr;
+            if (gender === 'male') {
+                bmr = (10 * weight) + (6.25 * height) - (5 * age) + 5;
+            } else {
+                bmr = (10 * weight) + (6.25 * height) - (5 * age) - 161;
             }
-            var macros = calculateMacros(totalCalories, weight, goal);
-            var protein = macros[0];
-            var carbs = macros[1];
-            var fats = macros[2];
 
+            // 2. TDEE 계산
+            var tdee = bmr * exerciseLevel;
+
+            // 3. 목표에 따른 칼로리 설정
+            var totalCalories;
+            if (goal === 'diet') {
+                totalCalories = tdee * 0.85; // 15% 칼로리 감소
+            } else if (goal === 'bulk') {
+                totalCalories = tdee * 1.15; // 15% 칼로리 증가
+            } else {
+                totalCalories = tdee; // 유지
+            }
+
+            // 4. 영양소 비율 설정
+            // 단백질: 체중(kg) × 2.0g
+            var protein = weight * 2.0; // g
+            var proteinCalories = protein * 4; // kcal
+
+            // 지방: 총 칼로리의 25%
+            var fatCalories = totalCalories * 0.25;
+            var fats = fatCalories / 9; // g
+
+            // 탄수화물: 남은 칼로리
+            var remainingCalories = totalCalories - proteinCalories - fatCalories;
+            var carbs = remainingCalories / 4; // g
+
+            // 각 식사당 영양소
             var proteinPerMeal = protein / mealsPerDay;
             var carbsPerMeal = carbs / mealsPerDay;
             var fatsPerMeal = fats / mealsPerDay;
             var caloriesPerMeal = totalCalories  / mealsPerDay;
         
-            return { tdee, totalCalories, protein, carbs, fats, proteinPerMeal, carbsPerMeal, fatsPerMeal, caloriesPerMeal };
+            return { 
+                name, 
+                tdee, 
+                totalCalories, 
+                protein, 
+                carbs, 
+                fats, 
+                proteinPerMeal, 
+                carbsPerMeal, 
+                fatsPerMeal, 
+                caloriesPerMeal, 
+                mealsPerDay 
+            };
         }
-
-        function calculateMacros(totalCalories, weight, goal) {
-          var protein, carbs, fats;
-          if (goal === 'diet') {
-              // 다이어트: 총 칼로리 = TDEE - 500, 탄:단:지 비율 3:5:2
-              protein = totalCalories * 0.5 / 4; // 칼로리의 50%는 단백질
-              carbs = totalCalories * 0.3 / 4;   // 칼로리의 30%는 탄수화물
-              fats = totalCalories * 0.2 / 9;    // 칼로리의 20%는 지방
-          } else if (goal === 'bulk') {
-              // 벌크업: 총 칼로리 = TDEE + 500, 탄:단:지 비율 4:4:2
-              protein = totalCalories * 0.4 / 4; // 칼로리의 40%는 단백질
-              carbs = totalCalories * 0.4 / 4;   // 칼로리의 40%는 탄수화물
-              fats = totalCalories * 0.2 / 9;    // 칼로리의 20%는 지방
-          } else { 
-              // 유지: 벌크업과 동일한 비율 사용 (다른 옵션이 없는 경우)
-              protein = totalCalories * 0.4 / 4;
-              carbs = totalCalories * 0.4 / 4;
-              fats = totalCalories * 0.2 / 9;
-          }
-          return [protein, carbs, fats];
-      }
-      
-
-        // function saveAsPDF() {
-        //     var results = JSON.parse(localStorage.getItem('results'));
-        //     const { jsPDF } = window.jspdf;
-        //     const doc = new jsPDF();
-
-        //     // Set the default font for the document
-        //     doc.setFont('Helvetica');
-
-        //     // Set a title with a larger font and center alignment
-        //     doc.setFontSize(18);
-        //     doc.setFont(undefined, 'bold');
-        //     doc.text(`Results for ${results.name}`, 105, 20, null, null, 'center');
-
-        //     // Draw a line under the title for separation
-        //     doc.setDrawColor(0);
-        //     doc.setLineWidth(0.5);
-        //     doc.line(20, 25, 190, 25);
-
-        //     // Section headers with a slightly larger font
-        //     doc.setFontSize(14);
-        //     doc.setFont(undefined, 'bold');
-        //     doc.text('Total Daily Energy Expenditure (TDEE)', 20, 35);
-
-        //     doc.setFontSize(12);
-        //     doc.setFont(undefined, 'normal');
-        //     doc.text(`${results.tdee} kcal`, 20, 45);
-
-        //     doc.setFontSize(14);
-        //     doc.setFont(undefined, 'bold');
-        //     doc.text('Total Daily Calories', 20, 55);
-        //     doc.setFontSize(12);
-        //     doc.setFont(undefined, 'normal');
-        //     doc.text(`${results.totalCalories} kcal`, 20, 65);
-
-        //     doc.setFontSize(14);
-        //     doc.setFont(undefined, 'bold');
-        //     doc.text('Nutrient Breakdown', 20, 75);
-        //     doc.setFontSize(12);
-        //     doc.setFont(undefined, 'normal');
-        //     doc.text(`Protein: ${results.protein} g`, 20, 85);
-        //     doc.text(`Carbohydrates: ${results.carbs} g`, 20, 95);
-        //     doc.text(`Fats: ${results.fats} g`, 20, 105);
-
-        //     doc.setFontSize(14);
-        //     doc.setFont(undefined, 'bold');
-        //     doc.text(`Per Meal Breakdown (Based on ${results.mealsPerDay} meals per day)`, 20, 115);
-
-        //     doc.setFontSize(12);
-        //     doc.setFont(undefined, 'normal');
-        //     doc.text(`Calories per Meal: ${results.caloriesPerMeal.toFixed(2)} kcal`, 20, 125);
-        //     doc.text(`Protein per Meal: ${results.proteinPerMeal.toFixed(2)} g`, 20, 135);
-        //     doc.text(`Carbohydrates per Meal: ${results.carbsPerMeal.toFixed(2)} g`, 20, 145);
-        //     doc.text(`Fats per Meal: ${results.fatsPerMeal.toFixed(2)} g`, 20, 155);
-
-        //     // Optionally, add a footer
-        //     doc.setTextColor(150);
-        //     doc.setFontSize(10);
-        //     doc.text('Generated by HumanBalanceGYM', 105, 285, null, null, 'center');
-
-        //     doc.save('HB-MRcalculator_results.pdf');
-        // }
 
         function displayResults(results) {
             var resultsDiv = document.getElementById('results');
-            var mealsPerDay = parseInt(document.querySelector('input[name="mealsPerDay"]:checked').value); 
             resultsDiv.innerHTML = `
         <div class="card">
             <div class="card-header">Total Daily Energy Expenditure (TDEE)</div>
@@ -328,21 +269,15 @@
             <div class="data"><span class="label">Fats:</span><span class="value">${results.fats.toFixed(2)} g</span></div>
         </div>
         <div class="card">
-            <div class="card-header">Per Meal Breakdown<br><span class="sub-title">(Based on ${mealsPerDay} meals per day)</span></div>
+            <div class="card-header">Per Meal Breakdown<br><span class="sub-title">(Based on ${results.mealsPerDay} meals per day)</span></div>
             <div class="data"><span class="label">Calories per Meal:</span><span class="value">${results.caloriesPerMeal.toFixed(2)} kcal</span></div>
             <div class="data"><span class="label">Protein per Meal:</span><span class="value">${results.proteinPerMeal.toFixed(2)} g</span></div>
             <div class="data"><span class="label">Carbohydrates per Meal:</span><span class="value">${results.carbsPerMeal.toFixed(2)} g</span></div>
             <div class="data"><span class="label">Fats per Meal:</span><span class="value">${results.fatsPerMeal.toFixed(2)} g</span></div>
         </div>
-        <!-- Nutrition Chart Image Added Below -->
-        <div class="card">
-            <div class="card-header">Nutrition Chart</div>
-            <div class="data">
-                <img src="food_chart.jpg" alt="Nutrition Chart" style="max-width: 100%; height: auto;">
-            </div>
-        </div>
             `;
         }
+
         function saveToLocalStorage(results) {
             localStorage.setItem('results', JSON.stringify(results));
         }
@@ -356,6 +291,3 @@
     </script>
 </body>
 </html>
-
-
-
